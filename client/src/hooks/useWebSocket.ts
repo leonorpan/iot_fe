@@ -1,4 +1,4 @@
-import { useEffect, useRef, useCallback } from "react";
+import { useEffect, useRef, useCallback, useState } from "react";
 
 interface WebSocketMessage {
   command: string;
@@ -15,7 +15,9 @@ interface UseWebSocketOptions<T> {
 
 function useWebSocket<T>(options: UseWebSocketOptions<T>) {
   const { url, onMessage, onOpen, onError, onClose } = options;
-  const wsRef = useRef<WebSocket | null>(null); // Use a distinct ref name
+  const wsRef = useRef<WebSocket | null>(null);
+  const [readyState, setReadyState] = useState<number>(WebSocket.CONNECTING);
+  const [reconnectAttempt, setReconnectAttempt] = useState(0);
 
   const sendMessage = useCallback((message: WebSocketMessage) => {
     if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
@@ -31,6 +33,7 @@ function useWebSocket<T>(options: UseWebSocketOptions<T>) {
   }, []);
 
   useEffect(() => {
+    let timeoutId: number | null = null;
     if (wsRef.current) {
       if (
         wsRef.current.readyState === WebSocket.OPEN ||
@@ -47,6 +50,7 @@ function useWebSocket<T>(options: UseWebSocketOptions<T>) {
 
     ws.onopen = () => {
       console.log("WebSocket connection opened (from ws.onopen callback)");
+      setReadyState(WebSocket.OPEN);
       onOpen?.();
     };
 
@@ -55,14 +59,28 @@ function useWebSocket<T>(options: UseWebSocketOptions<T>) {
       onMessage(data);
     };
 
-    ws.onerror = (event) => {
+    ws.onerror = (event: Event) => {
       console.error("WebSocket error (from ws.onerror callback):", event);
+      // setReadyState(WebSocket.OPEN);
       onError?.(event);
     };
 
-    ws.onclose = (event) => {
+    ws.onclose = (event: CloseEvent) => {
       console.log("WebSocket connection closed (from ws.onclose callback)");
+      setReadyState(WebSocket.CLOSED);
       onClose?.(event);
+
+      if (event.code !== 1000 && event.code !== 1001) {
+        // 1000 is normal closure, 1001 is browser closing tab
+        console.log(
+          `Abnormal WebSocket closure. Code: ${event.code}. Attempting to reconnect...`
+        );
+        if (timeoutId) clearTimeout(timeoutId);
+        timeoutId = setTimeout(() => {
+          console.log("Attempting to reconnect...");
+          setReconnectAttempt((prev) => prev + 1);
+        }, 3000);
+      }
     };
 
     return () => {
@@ -80,9 +98,9 @@ function useWebSocket<T>(options: UseWebSocketOptions<T>) {
         wsRef.current = null;
       }
     };
-  }, [url, onMessage, onOpen, onError, onClose]);
+  }, [url, onMessage, onOpen, onError, onClose, reconnectAttempt]);
 
-  return { sendMessage };
+  return { sendMessage, readyState };
 }
 
 export default useWebSocket;

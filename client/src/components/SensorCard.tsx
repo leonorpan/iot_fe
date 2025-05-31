@@ -24,10 +24,10 @@ const SensorCard: React.FC<SensorCardProps> = ({
       <h2 className="text-xl font-semibold text-gray-900 mb-2">
         {sensor.name}
       </h2>
-      <p className="text-gray-700">
+      <p className="text-gray-700" data-testid="sensor-id">
         <span className="font-medium">ID:</span> {sensor.id}
       </p>
-      <p className="text-gray-700">
+      <p className="text-gray-700" data-testid="sensor-status">
         <span className="font-medium">Status:</span>{" "}
         <span
           className={`font-bold ${
@@ -37,7 +37,7 @@ const SensorCard: React.FC<SensorCardProps> = ({
           {sensor.connected ? "Connected" : "Disconnected"}
         </span>
       </p>
-      <p className="text-gray-700 mb-4">
+      <p className="text-gray-700 mb-4" data-testid="sensor-value">
         <span className="font-medium">Value:</span>{" "}
         {sensor.value !== null ? `${sensor.value} ${sensor.unit}` : "N/A"}
       </p>
