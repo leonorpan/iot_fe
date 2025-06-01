@@ -6,7 +6,9 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
-    "lint": "eslint .",
+    "lint": "eslint --ext .ts,.tsx,.js --max-warnings=0",
+    "lint-fix": "eslint . --fix",
+    "tsc-check": "tsc --noEmit",
     "preview": "vite preview",
     "test": "vitest",
     "test:watch": "vitest --watch",
@@ -28,6 +30,7 @@
     "eslint": "^9.25.0",
     "eslint-plugin-react-hooks": "^5.2.0",
     "eslint-plugin-react-refresh": "^0.4.19",
+    "eslint-plugin-simple-import-sort": "^12.1.1",
     "globals": "^16.0.0",
     "jsdom": "^26.1.0",
     "postcss": "^8.5.4",

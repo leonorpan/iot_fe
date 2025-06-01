@@ -1,4 +1,3 @@
-import React from "react";
 import { type Sensor } from "../types";
 
 interface SensorCardProps {
@@ -6,10 +5,7 @@ interface SensorCardProps {
   onToggleConnection: (sensorId: string, isConnected: boolean) => void;
 }
 
-const SensorCard: React.FC<SensorCardProps> = ({
-  sensor,
-  onToggleConnection,
-}) => {
+function SensorCard({ sensor, onToggleConnection }: SensorCardProps) {
   return (
     <div
       key={sensor.id}
@@ -54,6 +50,6 @@ const SensorCard: React.FC<SensorCardProps> = ({
       </button>
     </div>
   );
-};
+}
 
 export default SensorCard;

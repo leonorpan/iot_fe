@@ -1,7 +1,8 @@
-import { useState, useCallback } from "react";
-import useWebSocket from "./hooks/useWebSocket";
+import { useCallback, useState } from "react";
+
 import SensorCard from "./components/SensorCard";
 import { SENSOR_WS_URL } from "./consts";
+import useWebSocket from "./hooks/useWebSocket";
 import { type Sensor } from "./types";
 
 function App() {
@@ -9,9 +10,9 @@ function App() {
   const [showConnectedOnly, setShowConnectedOnly] = useState(false);
 
   const handleWebSocketMessage = useCallback((incomingSensor: Sensor) => {
-    setSensors((prevSensors) => {
+    setSensors((prevSensors: Sensor[]) => {
       const existingSensorIndex = prevSensors.findIndex(
-        (s) => s.id === incomingSensor.id
+        (s: Sensor) => s.id === incomingSensor.id
       );
 
       if (existingSensorIndex > -1) {

@@ -1,5 +1,6 @@
-import { describe, it, expect, vi, beforeEach, type Mock } from "vitest";
-import { render, screen, fireEvent } from "@testing-library/react";
+import { fireEvent,render, screen } from "@testing-library/react";
+import { beforeEach, describe, expect, it, type Mock,vi } from "vitest";
+
 import App from "./App";
 import useWebSocket from "./hooks/useWebSocket";
 import type { Sensor } from "./types";

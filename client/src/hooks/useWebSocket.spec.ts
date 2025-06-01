@@ -1,7 +1,8 @@
-import { renderHook, act } from "@testing-library/react";
-import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import useWebSocket from "./useWebSocket";
+import { act,renderHook } from "@testing-library/react";
+import { afterEach,beforeEach, describe, expect, it, vi } from "vitest";
+
 import { type Sensor } from "../types";
+import useWebSocket from "./useWebSocket";
 
 class MockWebSocket {
   public onopen: ((event: Event) => void) | null = null;
