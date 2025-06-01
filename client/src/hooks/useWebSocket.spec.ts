@@ -1,5 +1,5 @@
-import { act,renderHook } from "@testing-library/react";
-import { afterEach,beforeEach, describe, expect, it, vi } from "vitest";
+import { act, renderHook } from "@testing-library/react";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { type Sensor } from "../types";
 import useWebSocket from "./useWebSocket";
@@ -88,7 +88,7 @@ describe("useWebSocket", () => {
       })
     );
 
-    expect(result.current.readyState).toBe(WebSocket.CONNECTING);
+    expect(result.current.socketStatus).toBe("connecting");
     expect(MockWebSocket.instance).not.toBeNull();
     expect(MockWebSocket.instance).toBeInstanceOf(MockWebSocket);
     expect(MockWebSocket.instance?.url).toBe(MOCK_URL);
@@ -97,7 +97,7 @@ describe("useWebSocket", () => {
       vi.advanceTimersByTime(100);
     });
 
-    expect(result.current.readyState).toBe(WebSocket.OPEN);
+    expect(result.current.socketStatus).toBe("open");
     expect(mockOnOpen).toHaveBeenCalledTimes(1);
   });
 
@@ -116,7 +116,7 @@ describe("useWebSocket", () => {
       vi.advanceTimersByTime(100);
     });
 
-    expect(result.current.readyState).toBe(WebSocket.OPEN);
+    expect(result.current.socketStatus).toBe("open");
     const sensorData = {
       id: "sensor1",
       name: "Temperature",
@@ -146,7 +146,7 @@ describe("useWebSocket", () => {
     await act(async () => {
       vi.advanceTimersByTime(100);
     });
-    expect(result.current.readyState).toBe(WebSocket.OPEN);
+    expect(result.current.socketStatus).toBe("open");
     const messageToSend = { command: "connect", id: "sensor-123" };
     act(() => {
       result.current.sendMessage(messageToSend);
@@ -197,13 +197,13 @@ describe("useWebSocket", () => {
       vi.advanceTimersByTime(100);
     });
 
-    expect(result.current.readyState).toBe(WebSocket.OPEN);
+    expect(result.current.socketStatus).toBe("open");
     await act(async () => {
       MockWebSocket.triggerError();
     });
 
     expect(mockOnError).toHaveBeenCalledTimes(1);
-    expect(result.current.readyState).toBe(WebSocket.OPEN);
+    expect(result.current.socketStatus).toBe("open");
   });
 
   it("should close normally and not attempt reconnect on code 1000", async () => {
@@ -220,19 +220,19 @@ describe("useWebSocket", () => {
     await act(async () => {
       vi.advanceTimersByTime(100);
     });
-    expect(result.current.readyState).toBe(WebSocket.OPEN);
+    expect(result.current.socketStatus).toBe("open");
     await act(async () => {
       MockWebSocket.triggerClose(1000, "Normal closure");
     });
 
-    expect(result.current.readyState).toBe(WebSocket.CLOSED);
+    expect(result.current.socketStatus).toBe("closed");
     expect(mockOnClose).toHaveBeenCalledTimes(1);
 
     await act(async () => {
       vi.advanceTimersByTime(5000);
     });
 
-    expect(result.current.readyState).toBe(WebSocket.CLOSED);
+    expect(result.current.socketStatus).toBe("closed");
     expect(MockWebSocket.instance?.url).toBe(MOCK_URL);
   });
 
@@ -250,7 +250,7 @@ describe("useWebSocket", () => {
     await act(async () => {
       vi.advanceTimersByTime(100);
     });
-    expect(result.current.readyState).toBe(WebSocket.OPEN);
+    expect(result.current.socketStatus).toBe("open");
     mockOnOpen.mockClear();
     mockOnClose.mockClear();
     const oldMockInstance = MockWebSocket.instance;
@@ -259,7 +259,7 @@ describe("useWebSocket", () => {
       MockWebSocket.triggerClose(1006, "Abnormal closure");
     });
 
-    expect(result.current.readyState).toBe(WebSocket.CLOSED);
+    expect(result.current.socketStatus).toBe("closed");
     expect(mockOnClose).toHaveBeenCalledTimes(1);
     expect(mockOnClose).toHaveBeenCalledWith(
       expect.objectContaining({ code: 1006 })
@@ -274,7 +274,7 @@ describe("useWebSocket", () => {
     await act(async () => {
       vi.advanceTimersByTime(100);
     });
-    expect(result.current.readyState).toBe(MockWebSocket.OPEN);
+    expect(result.current.socketStatus).toBe("open");
     expect(mockOnOpen).toHaveBeenCalledTimes(1);
   });
 
@@ -292,7 +292,7 @@ describe("useWebSocket", () => {
     await act(async () => {
       vi.advanceTimersByTime(100);
     });
-    expect(result.current.readyState).toBe(WebSocket.OPEN);
+    expect(result.current.socketStatus).toBe("open");
 
     const closeSpy = vi.spyOn(MockWebSocket.instance!, "close");
 

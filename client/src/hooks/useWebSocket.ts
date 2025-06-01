@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { Ref, useCallback, useEffect, useRef, useState } from "react";
 
 interface WebSocketMessage {
   command: string;
@@ -13,11 +13,14 @@ interface UseWebSocketOptions<T> {
   onClose?: (event: CloseEvent) => void;
 }
 
+type IoTSocketStatus = "connecting" | "open" | "closed" | "closing";
+
 function useWebSocket<T>(options: UseWebSocketOptions<T>) {
-  const { url, onMessage, onOpen, onError, onClose } = options;
   const wsRef = useRef<WebSocket | null>(null);
   const [readyState, setReadyState] = useState<number>(WebSocket.CONNECTING);
+
   const [reconnectAttempt, setReconnectAttempt] = useState(0);
+  const timeoutId: Ref<number | null> = useRef(null);
 
   const sendMessage = useCallback((message: WebSocketMessage) => {
     if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
@@ -33,51 +36,43 @@ function useWebSocket<T>(options: UseWebSocketOptions<T>) {
   }, []);
 
   useEffect(() => {
-    let timeoutId: number | null = null;
     if (wsRef.current) {
-      if (
-        wsRef.current.readyState === WebSocket.OPEN ||
-        wsRef.current.readyState === WebSocket.CONNECTING
-      ) {
-        wsRef.current.close(1000, "Effect cleanup before new connection");
-        console.log("Existing WebSocket closed before new one was created.");
-      }
-      wsRef.current = null;
+      return;
     }
 
-    const ws = new WebSocket(url);
+    const ws = new WebSocket(options.url);
     wsRef.current = ws;
 
     ws.onopen = () => {
-      console.log("WebSocket connection opened (from ws.onopen callback)");
+      console.info("WebSocket connection opened (from ws.onopen callback)");
       setReadyState(WebSocket.OPEN);
-      onOpen?.();
+      options.onOpen?.();
     };
 
     ws.onmessage = (event) => {
       const data: T = JSON.parse(event.data);
-      onMessage(data);
+      options.onMessage(data);
     };
 
     ws.onerror = (event: Event) => {
       console.error("WebSocket error (from ws.onerror callback):", event);
       // setReadyState(WebSocket.OPEN);
-      onError?.(event);
+      options.onError?.(event);
     };
 
     ws.onclose = (event: CloseEvent) => {
-      console.log("WebSocket connection closed (from ws.onclose callback)");
+      console.info("WebSocket connection closed (from ws.onclose callback)");
       setReadyState(WebSocket.CLOSED);
-      onClose?.(event);
+      options.onClose?.(event);
 
       if (event.code !== 1000 && event.code !== 1001) {
         // 1000 is normal closure, 1001 is browser closing tab
-        console.log(
+        console.info(
           `Abnormal WebSocket closure. Code: ${event.code}. Attempting to reconnect...`
         );
-        if (timeoutId) clearTimeout(timeoutId);
-        timeoutId = setTimeout(() => {
-          console.log("Attempting to reconnect...");
+        if (timeoutId.current) clearTimeout(timeoutId.current);
+        timeoutId.current = setTimeout(() => {
+          console.info("Attempting to reconnect...");
           setReconnectAttempt((prev) => prev + 1);
         }, 3000);
       }
@@ -98,9 +93,23 @@ function useWebSocket<T>(options: UseWebSocketOptions<T>) {
         wsRef.current = null;
       }
     };
-  }, [url, onMessage, onOpen, onError, onClose, reconnectAttempt]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [options.url, reconnectAttempt]);
 
-  return { sendMessage, readyState };
+  const getSocketStatus = (state: number): IoTSocketStatus => {
+    switch (state) {
+      case WebSocket.CONNECTING:
+        return "connecting";
+      case WebSocket.OPEN:
+        return "open";
+      case WebSocket.CLOSED:
+        return "closed";
+      default:
+        return "closing";
+    }
+  };
+
+  return { sendMessage, socketStatus: getSocketStatus(readyState) };
 }
 
 export default useWebSocket;

@@ -1,5 +1,5 @@
-import { fireEvent,render, screen } from "@testing-library/react";
-import { beforeEach, describe, expect, it, type Mock,vi } from "vitest";
+import { fireEvent, render, screen } from "@testing-library/react";
+import { beforeEach, describe, expect, it, type Mock, vi } from "vitest";
 
 import App from "./App";
 import useWebSocket from "./hooks/useWebSocket";
@@ -8,7 +8,7 @@ import type { Sensor } from "./types";
 vi.mock("./hooks/useWebSocket", () => ({
   default: vi.fn(() => ({
     sendMessage: vi.fn(),
-    readyState: 1,
+    socketStatus: "open",
   })),
 }));
 vi.mock("./components/SensorCard", () => ({
@@ -38,29 +38,29 @@ describe("App basic UI", () => {
   it("shows connection status: Connecting", () => {
     (useWebSocket as Mock).mockReturnValueOnce({
       sendMessage: vi.fn(),
-      readyState: WebSocket.CONNECTING,
+      socketStatus: "connecting",
     });
     render(<App />);
     expect(screen.getByTestId("connection-status")).toHaveTextContent(
-      "Connecting to server..."
+      "Connecting to the server..."
     );
   });
 
   it("shows connection status: Disconnected", () => {
     (useWebSocket as Mock).mockReturnValueOnce({
       sendMessage: vi.fn(),
-      readyState: WebSocket.CLOSED,
+      socketStatus: "closed",
     });
     render(<App />);
     expect(screen.getByTestId("connection-status")).toHaveTextContent(
-      "Disconnected. Attempting reconnect"
+      "Disconnected. Attempting to reconnect"
     );
   });
 
   it("renders the connected sensors count", () => {
     render(<App />);
     expect(screen.getByTestId("connection-status")).toHaveTextContent(
-      "Connected to server"
+      "Connected to the server"
     );
     expect(screen.getByTestId("connected-sensors-count")).toHaveTextContent(
       "0"
