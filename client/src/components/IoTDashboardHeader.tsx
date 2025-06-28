@@ -1,3 +1,4 @@
+import { memo } from "react";
 function IoTDashboardHeader({ children }: { children: React.ReactNode }) {
   return (
     <h1
@@ -9,4 +10,4 @@ function IoTDashboardHeader({ children }: { children: React.ReactNode }) {
   );
 }
 
-export default IoTDashboardHeader;
+export default memo(IoTDashboardHeader);

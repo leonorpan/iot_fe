@@ -15,14 +15,24 @@ function App() {
   const [showConnectedOnly, setShowConnectedOnly] = useState(false);
 
   const handleWebSocketMessage = useCallback((incomingSensor: Sensor) => {
-    setSensors((prev) =>
+    setSensors((prev) => {
       // Check if the sensor already exists in the array
-      prev.some((s) => s.id === incomingSensor.id)
+      return prev.some((s) => s.id === incomingSensor.id)
         ? // If it exists, replace it with the incoming sensor
-          prev.map((s) => (s.id === incomingSensor.id ? incomingSensor : s))
+          prev.map((s) =>
+            s.id === incomingSensor.id
+              ? {
+                  ...incomingSensor,
+                  // Update the value only if the sensor is connected
+                  value: incomingSensor.connected
+                    ? incomingSensor.value
+                    : s.value,
+                }
+              : s
+          )
         : // If not, add the incoming sensor to the array
-          [...prev, incomingSensor]
-    );
+          [...prev, incomingSensor];
+    });
   }, []);
 
   const onWsOpen = useCallback(() => {

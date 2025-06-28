@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useCallback, useMemo } from "react";
 
 import { Sensor } from "../types";
 import SensorCard from "./SensorCard";
@@ -20,15 +20,21 @@ function SensorsList({
     [sensors, showConnectedOnly]
   );
 
+  const handleToggleSensorConnection = useCallback(
+    (sensorId: string, connected: boolean) => {
+      console.warn("handleToggleSensorConnection is not implemented");
+      toggleSensorConnection(sensorId, connected);
+    },
+    [toggleSensorConnection]
+  );
+
   return filteredSensors.length > 0 ? (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 w-full max-w-6xl px-4">
       {filteredSensors.map((sensor: Sensor) => (
         <SensorCard
           key={sensor.id}
           sensor={sensor}
-          onToggleConnection={() =>
-            toggleSensorConnection(sensor.id, sensor.connected)
-          }
+          onToggleConnection={handleToggleSensorConnection}
         />
       ))}
     </div>

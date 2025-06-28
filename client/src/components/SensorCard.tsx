@@ -1,3 +1,5 @@
+import { memo } from "react";
+
 import { type Sensor } from "../types";
 
 interface SensorCardProps {
@@ -52,4 +54,4 @@ function SensorCard({ sensor, onToggleConnection }: SensorCardProps) {
   );
 }
 
-export default SensorCard;
+export default memo(SensorCard);
