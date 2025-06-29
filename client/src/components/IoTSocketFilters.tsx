@@ -1,12 +1,14 @@
-interface IoTSocketFiltersProps {
-  showConnectedOnly: boolean;
-  setShowConnectedOnly: (value: boolean) => void;
-}
+import { useDispatch, useSelector } from "react-redux";
 
-function IoTSocketFilters({
-  showConnectedOnly,
-  setShowConnectedOnly,
-}: IoTSocketFiltersProps) {
+import { setToConnectedOnly } from "../features/sensors";
+import { RootState } from "../store";
+
+function IoTSocketFilters() {
+  const dispatch = useDispatch();
+  const showConnectedOnly = useSelector(
+    (state: RootState) => state.sensors.showConnectedOnly
+  );
+
   return (
     <div
       className="mb-8 p-4 bg-white rounded-lg shadow-md flex items-center space-x-4"
@@ -23,7 +25,7 @@ function IoTSocketFilters({
         type="checkbox"
         id="showConnectedToggle"
         checked={showConnectedOnly}
-        onChange={(e) => setShowConnectedOnly(e.target.checked)}
+        onChange={(e) => dispatch(setToConnectedOnly(e.target.checked))}
         data-testid="iot-filter-input"
         className="form-checkbox h-5 w-5 text-indigo-600 rounded focus:ring-indigo-500"
       />

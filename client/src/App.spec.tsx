@@ -1,8 +1,9 @@
-import { fireEvent, render, screen } from "@testing-library/react";
+import { fireEvent, screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it, type Mock, vi } from "vitest";
 
 import App from "./App";
 import useWebSocket from "./hooks/useWebSocket";
+import { renderWithProviders } from "./test/test-utils";
 import type { Sensor } from "./types";
 
 vi.mock("./hooks/useWebSocket", () => ({
@@ -24,12 +25,12 @@ describe("App basic UI", () => {
   });
 
   it("renders the dashboard title", () => {
-    render(<App />);
+    renderWithProviders(<App />);
     expect(screen.getByTestId("app-title")).toBeInTheDocument();
   });
 
   it("shows connection status: Connected", () => {
-    render(<App />);
+    renderWithProviders(<App />);
     expect(screen.getByTestId("connection-status")).toHaveTextContent(
       "Connected"
     );
@@ -40,7 +41,7 @@ describe("App basic UI", () => {
       sendMessage: vi.fn(),
       socketStatus: "connecting",
     });
-    render(<App />);
+    renderWithProviders(<App />);
     expect(screen.getByTestId("connection-status")).toHaveTextContent(
       "Connecting to the server..."
     );
@@ -51,14 +52,14 @@ describe("App basic UI", () => {
       sendMessage: vi.fn(),
       socketStatus: "closed",
     });
-    render(<App />);
+    renderWithProviders(<App />);
     expect(screen.getByTestId("connection-status")).toHaveTextContent(
       "Disconnected. Attempting to reconnect"
     );
   });
 
   it("renders the connected sensors count", () => {
-    render(<App />);
+    renderWithProviders(<App />);
     expect(screen.getByTestId("connection-status")).toHaveTextContent(
       "Connected to the server"
     );
@@ -68,7 +69,7 @@ describe("App basic UI", () => {
   });
 
   it("renders the toggle for connected sensors only", () => {
-    render(<App />);
+    renderWithProviders(<App />);
     expect(screen.getByTestId("filter-toggle")).toBeInTheDocument();
     const checkbox = screen.getByRole("checkbox");
     expect(checkbox).not.toBeChecked();
@@ -77,7 +78,7 @@ describe("App basic UI", () => {
   });
 
   it("shows 'No sensors found' message when no sensors", () => {
-    render(<App />);
+    renderWithProviders(<App />);
     expect(screen.getByTestId("no-sensors")).toBeInTheDocument();
   });
 });

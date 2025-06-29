@@ -1,5 +1,6 @@
-import { useCallback, useState } from "react";
+import { useCallback } from "react";
 import { useMemo } from "react";
+import { useDispatch, useSelector } from "react-redux";
 
 import ConnectedSensorsCount from "./components/ConnectedSensorsCount";
 import IoTDashboardHeader from "./components/IoTDashboardHeader";
@@ -7,33 +8,18 @@ import IoTSocketFilters from "./components/IoTSocketFilters";
 import IoTSocketStatus from "./components/IoTSocketStatus";
 import SensorsList from "./components/SensorsList";
 import { SENSOR_WS_URL } from "./consts";
+import { upsertSensor } from "./features/sensors";
 import useWebSocket from "./hooks/useWebSocket";
+import { RootState } from "./store";
 import { type Sensor } from "./types";
 
 function App() {
-  const [sensors, setSensors] = useState<Sensor[]>([]);
-  const [showConnectedOnly, setShowConnectedOnly] = useState(false);
+  const dispatch = useDispatch();
+  const sensorsList = useSelector((state: RootState) => state.sensors.sensors);
 
-  const handleWebSocketMessage = useCallback((incomingSensor: Sensor) => {
-    setSensors((prev) => {
-      // Check if the sensor already exists in the array
-      return prev.some((s) => s.id === incomingSensor.id)
-        ? // If it exists, replace it with the incoming sensor
-          prev.map((s) =>
-            s.id === incomingSensor.id
-              ? {
-                  ...incomingSensor,
-                  // Update the value only if the sensor is connected
-                  value: incomingSensor.connected
-                    ? incomingSensor.value
-                    : s.value,
-                }
-              : s
-          )
-        : // If not, add the incoming sensor to the array
-          [...prev, incomingSensor];
-    });
-  }, []);
+  const handleWebSocketMessage = (incomingSensor: Sensor) => {
+    dispatch(upsertSensor(incomingSensor));
+  };
 
   const onWsOpen = useCallback(() => {
     console.info("App: WebSocket connected via hook");
@@ -64,8 +50,8 @@ function App() {
   );
 
   const connectedSensorsCount = useMemo(
-    () => sensors.filter((s) => s.connected).length,
-    [sensors]
+    () => sensorsList.filter((s) => s.connected).length,
+    [sensorsList]
   );
 
   return (
@@ -74,18 +60,11 @@ function App() {
 
       <IoTSocketStatus status={socketStatus} />
 
-      <IoTSocketFilters
-        showConnectedOnly={showConnectedOnly}
-        setShowConnectedOnly={setShowConnectedOnly}
-      />
+      <IoTSocketFilters />
 
       <ConnectedSensorsCount>{connectedSensorsCount}</ConnectedSensorsCount>
 
-      <SensorsList
-        showConnectedOnly={showConnectedOnly}
-        sensors={sensors}
-        toggleSensorConnection={toggleSensorConnection}
-      />
+      <SensorsList toggleSensorConnection={toggleSensorConnection} />
     </div>
   );
 }
