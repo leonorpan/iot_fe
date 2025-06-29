@@ -1,6 +1,6 @@
 import { combineReducers, configureStore } from "@reduxjs/toolkit";
 
-import sensorsReducer from "../features/sensors";
+import sensorsReducer from "../slices/sensors";
 
 export const rootReducer = combineReducers({
   sensors: sensorsReducer,

@@ -8,14 +8,13 @@ import IoTSocketFilters from "./components/IoTSocketFilters";
 import IoTSocketStatus from "./components/IoTSocketStatus";
 import SensorsList from "./components/SensorsList";
 import { SENSOR_WS_URL } from "./consts";
-import { upsertSensor } from "./features/sensors";
 import useWebSocket from "./hooks/useWebSocket";
-import { RootState } from "./store";
+import { selectSensors, upsertSensor } from "./slices/sensors";
 import { type Sensor } from "./types";
 
 function App() {
   const dispatch = useDispatch();
-  const sensorsList = useSelector((state: RootState) => state.sensors.sensors);
+  const sensorsList = useSelector(selectSensors);
 
   const handleWebSocketMessage = (incomingSensor: Sensor) => {
     dispatch(upsertSensor(incomingSensor));

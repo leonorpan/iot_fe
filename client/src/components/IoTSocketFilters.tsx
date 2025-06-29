@@ -1,6 +1,6 @@
 import { useDispatch, useSelector } from "react-redux";
 
-import { setToConnectedOnly } from "../features/sensors";
+import { setShowConnectedOnly } from "../slices/sensors";
 import { RootState } from "../store";
 
 function IoTSocketFilters() {
@@ -25,7 +25,7 @@ function IoTSocketFilters() {
         type="checkbox"
         id="showConnectedToggle"
         checked={showConnectedOnly}
-        onChange={(e) => dispatch(setToConnectedOnly(e.target.checked))}
+        onChange={(e) => dispatch(setShowConnectedOnly(e.target.checked))}
         data-testid="iot-filter-input"
         className="form-checkbox h-5 w-5 text-indigo-600 rounded focus:ring-indigo-500"
       />
